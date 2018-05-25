@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+	
+
+
+     <!-- Activemq connection factory -->
+    <bean id="amqConnectionFactory" class="org.apache.activemq.ActiveMQConnectionFactory">
+        <constructor-arg index="0" value="tcp://192.168.3.188:61616"/>
+        <property name="useAsyncSend" value="true"/>
+    </bean>
+
+
+    <!-- ConnectionFactory Definition -->
+    <bean id="connectionFactory" class="org.springframework.jms.connection.CachingConnectionFactory">
+        <constructor-arg ref="amqConnectionFactory"/>
+    </bean>
+
+
+    <!--  Default Destination Queue Definition-->
+    <bean id="defaultDestination" class="org.apache.activemq.command.ActiveMQQueue">
+        <constructor-arg index="0" value="spring-queue"/>
+    </bean>
+    
+    <bean id="destinationTopic" class="org.apache.activemq.command.ActiveMQTopic">
+        <constructor-arg index="0" value="spring-topic"/>
+    </bean>
+
+
+    <!-- JmsTemplate Definition -->
+    <bean id="jmsTemplate" class="org.springframework.jms.core.JmsTemplate">
+        <property name="connectionFactory" ref="connectionFactory"/>
+        <property name="defaultDestination" ref="destinationTopic"/>
+    </bean>
+    
+    
+    <bean id="msgReciver" class="ssm_angel.mq.test.amq.MessageReceiver"></bean>
+    <bean id="msgContainer" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+    	<property name="destination" ref="destinationTopic"></property>
+    	<property name="connectionFactory" ref="connectionFactory"></property>
+    	<property name="messageListener" ref="msgReciver"></property>
+    </bean>
+    
+</beans>
